@@ -1,0 +1,36 @@
+{
+  "name": "luogu-motaki-plan-preview",
+  "version": "0.0.1",
+  "description": "洛谷冬日绘板助手 Luogu Motaki 的计划预览",
+  "repository": "https://github.com/ouuan/luogu-motaki-plan-preview",
+  "author": "Yufan You <ouuansteve@gmail.com> (https://github.com/ouuan)",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "lint": "pnpm lint:nofix --fix",
+    "lint:nofix": "eslint . --ignore-path .gitignore --ext .ts,.vue,.js",
+    "lint:types": "vue-tsc --noEmit",
+    "serve": "vite",
+    "build": "pnpm lint && pnpm lint:types && vite build"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "lodash-es": "^4.17.21",
+    "naive-ui": "^2.21.1",
+    "vue": "^3.2.23"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.5",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "@vitejs/plugin-vue": "^1.10.1",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "eslint": "^8.3.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-vue": "^8.1.1",
+    "typescript": "^4.5.2",
+    "vite": "^2.6.14",
+    "vue-tsc": "^0.29.6"
+  }
+}
