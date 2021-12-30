@@ -205,4 +205,8 @@ function onUrlChanged() {
   margin: auto;
   margin-top: 20px;
 }
+
+canvas {
+  border: 2px solid grey;
+}
 </style>
