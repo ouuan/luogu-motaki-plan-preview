@@ -35,7 +35,7 @@
         </n-radio-group>
 
         <div v-if="type === 'server'">
-          <n-text>服务器地址（不带 <code>/file</code> 等路径</n-text>
+          <n-text>服务器地址（不带 <code>/file</code> 等路径）</n-text>
           <n-input
             v-model:value="serverUrl"
             type="text"
