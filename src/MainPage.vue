@@ -48,6 +48,7 @@
           <input
             ref="fileInput"
             type="file"
+            name="motaki-plan"
             accept="application/json"
             @change="onFileChanged"
           >
@@ -59,18 +60,39 @@
       v-show="ok"
       title="预览"
     >
+      <n-space justify="space-around">
+        <canvas
+          ref="canvas"
+          :width="WIDTH"
+          :height="HEIGHT"
+        />
+      </n-space>
+    </n-card>
+
+    <n-card
+      v-if="ok"
+      :title="type === 'server' ? '选择以添加至客户端（不选相当于全选）' : '任务列表'"
+    >
       <n-space vertical>
-        <n-space justify="space-around">
-          <canvas
-            ref="canvas"
-            :width="WIDTH"
-            :height="HEIGHT"
-          />
-        </n-space>
         <n-data-table
           :data="tableData"
           :columns="tableColumns"
+          :row-key="(row) => row.name"
+          @update:checked-row-keys="updateCheckedKeys"
         />
+        <n-p v-if="type === 'server'">
+          复制这一行添加到客户端配置文件即可：
+          <br>
+          <n-space>
+            <pre>{{ clientConfig }}</pre>
+            <n-button
+              type="primary"
+              @click="copyClientConfig"
+            >
+              复制
+            </n-button>
+          </n-space>
+        </n-p>
       </n-space>
     </n-card>
   </n-space>
@@ -78,10 +100,13 @@
 
 <script setup lang="ts">
 import {
+  DataTableColumns,
   NA,
+  NButton,
   NCard,
   NDataTable,
   NInput,
+  NP,
   NPageHeader,
   NRadio,
   NRadioGroup,
@@ -89,7 +114,12 @@ import {
   NText,
   useMessage,
 } from 'naive-ui';
-import { ref, onMounted } from 'vue';
+import {
+  computed,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import axios from 'axios';
 import { isPlan, validatePlan } from './validatePlan';
 import { HEIGHT, palette, WIDTH } from './constants';
@@ -108,7 +138,7 @@ const tableData = ref<Array<{
   size: string;
 }
 >>([]);
-const tableColumns = [
+const columns: DataTableColumns = [
   {
     title: '名称',
     key: 'name',
@@ -123,6 +153,10 @@ const tableColumns = [
     key: 'size',
   },
 ];
+const tableColumns = computed(() => {
+  if (type.value === 'file') return columns;
+  return ([{ type: 'selection' }] as DataTableColumns).concat(columns);
+});
 
 function processPlan(plan: unknown) {
   if (typeof plan !== 'object' || plan === null || !isPlan(plan)) {
@@ -184,17 +218,27 @@ function onUrlChanged() {
     msg.error('Server URL too short');
     return;
   }
-  axios.get(`${serverUrl.value}/package.json`)
+  axios.get(`${serverUrl.value.trim()}/plan`)
     .then((res) => {
       if (res.status === 200) {
         const { data } = res;
-        const plan = JSON.parse(data);
-        processPlan(plan);
+        processPlan(data);
       }
     }).catch((err) => {
       msg.error(err.toString());
     });
 }
+
+watch([type], () => {
+  ok.value = false;
+  if (type.value === 'file') {
+    if (fileInput.value?.files?.length) {
+      onFileChanged();
+    }
+  } else if (serverUrl.value) {
+    onUrlChanged();
+  }
+});
 
 onMounted(() => {
   const query = new URLSearchParams(window.location.search);
@@ -205,11 +249,27 @@ onMounted(() => {
   }
 });
 
+const checkedKeys = ref<(string|number)[]>([]);
+
+function updateCheckedKeys(newKeys: (string|number)[]) {
+  checkedKeys.value = newKeys;
+}
+
+const clientConfig = computed(() => {
+  const selectedTasks = checkedKeys.value.map((key) => key.toString());
+  return `${serverUrl.value} ${selectedTasks.join(' ')}`;
+});
+
+function copyClientConfig() {
+  navigator.clipboard.writeText(clientConfig.value)
+    .then(() => { msg.success('复制成功'); })
+    .catch((err) => msg.error(`复制失败: ${err}`));
+}
+
 </script>
 
 <style scoped>
 #main {
-  min-width: 1040px;
   max-width: 80%;
   margin: auto;
   margin-top: 20px;
