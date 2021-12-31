@@ -89,7 +89,7 @@ import {
   NText,
   useMessage,
 } from 'naive-ui';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { isPlan, validatePlan } from './validatePlan';
 import { HEIGHT, palette, WIDTH } from './constants';
@@ -195,6 +195,15 @@ function onUrlChanged() {
       msg.error(err.toString());
     });
 }
+
+onMounted(() => {
+  const query = new URLSearchParams(window.location.search);
+  const server = query.get('server');
+  if (server) {
+    serverUrl.value = server;
+    onUrlChanged();
+  }
+});
 
 </script>
 
